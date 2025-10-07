@@ -10,6 +10,10 @@ RUN apt-get update && apt-get install -y \
 # Copy all project files
 COPY . /var/www/html/
 
+RUN sed -i 's|/var/www/html|/var/www/html/public|g' /etc/apache2/sites-available/000-default.conf
+
+WORKDIR /var/www/html/public
+
 # Set permissions for SQLite database
 RUN chown -R www-data:www-data /var/www/html/db
 

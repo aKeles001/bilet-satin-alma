@@ -3,17 +3,15 @@ session_start();
 include 'header.php';
 ?>
 
-<!-- Hero Section -->
 <div class="text-center py-5 bg-primary text-light rounded-3 shadow-sm">
-  <h1 class="display-5 fw-bold">Otobüs Biletinizi Kolayca Satın Alın</h1>
+  <h1 class="display-5 fw-bold">Otobüs Biletinizi Kolayca Satın Al</h1>
   <p class="lead">Türkiye’nin her yerine güvenli ve hızlı ulaşım.</p>
 </div>
 
-<!-- Search Form -->
 <div class="card mt-5 shadow-sm">
   <div class="card-body">
     <h4 class="card-title mb-4 text-center">Sefer Ara</h4>
-    <form method="GET" action="search_results.php" class="row g-3">
+    <form method="GET" action="searchresults.php" class="row g-3">
       <div class="col-md-4">
         <label class="form-label">Kalkış Noktası</label>
         <input type="text" class="form-control" name="from" required>
