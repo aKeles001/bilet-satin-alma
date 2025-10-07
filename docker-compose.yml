@@ -1,7 +1,9 @@
 services:
   web:
     build: .
+    container_name: bilet-app
     ports:
       - "8080:80"
     volumes:
       - .:/var/www/html
+    working_dir: /var/www/html/public
