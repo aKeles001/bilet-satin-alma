@@ -3,16 +3,20 @@ session_start();
 require_once __DIR__ . '/../src/auth.php';
 requireLogin();
 include 'header.php';
-
+$user_role = $_SESSION['role'] ?? 'user';
 $user_id = $_SESSION['user_id'];
+$company_id = $_SESSION['company_id'];
+$full_name = $_SESSION['full_name'] ?? '';
 
-// Fetch balance
-
-$user = get_user_balance($user_id);
-$balance = $user ? $user['balance'] : 0;
-$full_name = $user ? $user['full_name'] : '';
-// Fetch tickets
-$tickets = get_user_tickets($user_id, 20);
+if (isCompany()) {
+    $tickets = get_company_trips($company_id);
+    $user = get_user_balance($user_id);
+    $balance = $user ? $user['balance'] : 0;
+} else {
+    $user = get_user_balance($user_id);
+    $balance = $user ? $user['balance'] : 0;
+    $tickets = get_user_tickets($user_id, 20);
+}
 ?>
 <div class="main-content">
   <div class="container">
@@ -49,7 +53,9 @@ $tickets = get_user_tickets($user_id, 20);
                       <td><?= date('d M Y  h:m', strtotime($ticket['departure_time'])) ?></td>
                       <td><?= date('h:m', strtotime($ticket['departure_time'])) ?></td>
                       <td>
-                        <?php if ($ticket['status'] === 'active'): ?>
+                        <?php if ($user_role === 'company'): ?>
+                          <span class="badge bg-success">Test</span>
+                        <?php elseif ($ticket['status'] === 'active'): ?>
                           <span class="badge bg-success">Aktif</span>
                         <?php elseif ($ticket['status'] === 'cancelled'): ?>
                           <span class="badge bg-danger">İptal</span>
@@ -65,6 +71,12 @@ $tickets = get_user_tickets($user_id, 20);
             <?php if (isAdmin()): ?>
                 <div class="mt-3 text-end">
                     <a href="/public/admin.php" class="btn btn-danger">Admin Panel</a>
+                </div>
+            <?php endif; ?>
+            <?php if (isCompany()): ?>
+                <div class="mt-3 text-end">
+                    <a href="admin.php" class="btn btn-danger">Firma Admin Panel</a>
+                    <a href="sefer_ekle.php" class="btn btn-danger">Sefer Ekle</a>
                 </div>
             <?php endif; ?>
           </div>
