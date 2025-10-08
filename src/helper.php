@@ -93,4 +93,53 @@ function get_user_tickets($user_id, $limit = 5) {
     $stmt->execute();
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
+
+function get_company_trips($company_id) {
+    require __DIR__ . '/db_connect.php';
+    $stmt = $db->prepare('SELECT id, company_id, destination_city, departure_city, departure_time, price capacity, created_date
+        FROM Trips
+        WHERE company_id = :company_id
+        ORDER BY created_date DESC');
+    $stmt->bindValue(':company_id', $company_id, PDO::PARAM_STR);
+    $stmt->execute();
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
+
+function registerTrip($destination_city, $departure_city, $departure_time, $arrival_time, $price, $capacity, $company_id)
+{
+    global $db;
+
+    $destination_city = trim($destination_city ?? '');
+    $departure_city = trim($departure_city ?? '');
+    $departure_time = trim($departure_time ?? '');
+    $arrival_time = trim($arrival_time ?? '');
+    $price = trim($price ?? '');
+    $capacity = trim($capacity ?? '');
+    $company_id = trim($company_id ?? '');
+
+    if (!$destination_city || !$departure_city || !$departure_time || !$arrival_time || !$price || !$capacity || !$company_id) {
+         return ['success' => false, 'message' => 'All fields are required.'];
+    }
+    // Check if user exists
+    $id = uuid();
+
+    $stmt = $db->prepare("INSERT INTO `Trips` (id, destination_city, departure_city, departure_time, arrival_time, price, capacity, company_id) VALUES (:id, :destination_city, :departure_city, :departure_time, :arrival_time, :price, :capacity, :company_id)");
+    $result = $stmt->execute([
+        ':id' => $id,
+        ':destination_city' => $destination_city,
+        ':departure_city' => $departure_city,
+        ':departure_time' => $departure_time,
+        ':arrival_time' => $arrival_time,
+        ':price' => $price,
+        ':capacity' => $capacity,
+        ':company_id' => $company_id
+    ]);
+
+    if ($result) {
+        return ['success' => true, 'message' => 'Sefer başarıyla eklendi.'];
+    } else {
+        return ['success' => false, 'message' => 'Sefer eklenirken bir hata oluştu.'];
+    }
+}
 ?>

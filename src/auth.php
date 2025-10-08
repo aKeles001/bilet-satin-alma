@@ -22,6 +22,7 @@ function loginUser($email, $password)
     }
 
     $_SESSION['user_id'] = $user['id'];
+    $_SESSION['company_id'] = $user['company_id'];
     $_SESSION['full_name'] = $user['full_name'];
     $_SESSION['email'] = $user['email'];
     $_SESSION['role'] = $user['role'] ?? 'user';
@@ -45,6 +46,10 @@ function requireLogin()
 function isAdmin()
 {
     return isset($_SESSION['role']) && $_SESSION['role'] === 'admin';
+}
+function isCompany()
+{
+    return isset($_SESSION['role']) && $_SESSION['role'] === 'company';
 }
 function registerUser($full_name, $email, $password)
 {
