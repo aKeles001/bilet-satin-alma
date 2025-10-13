@@ -26,6 +26,7 @@ function loginUser($email, $password)
     $_SESSION['full_name'] = $user['full_name'];
     $_SESSION['email'] = $user['email'];
     $_SESSION['role'] = $user['role'] ?? 'user';
+    $_SESSION['balance'] = $user['balance'] ??'';
 
     return ['success' => true, 'user' => $user];
 }

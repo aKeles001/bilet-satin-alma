@@ -1,0 +1,112 @@
+<?php
+session_start();
+require_once __DIR__ . '/../src/auth.php';
+require_once __DIR__ .'/../src/helper.php';
+requireLogin();
+include 'header.php';
+
+$user_id = $_SESSION['user_id'];
+$company_id = $_SESSION['company_id'];
+$full_name = $_SESSION['full_name'] ?? '';
+
+$trips = get_company_trips($company_id);
+$coupons = get_company_coupons($company_id);
+
+?>
+<div class="main-content">
+  <div class="container">
+  <h2 class="mb-4">Hoşgeldin, <?= htmlspecialchars($full_name) ?></h2>
+    <div class="row g-4">
+      <div class="col-md-4">
+        <div class="card text-center shadow-sm">
+        </div>
+      </div>
+      <div class="col-md-8">
+        <div class="card shadow-sm">
+          <div class="card-body">
+            <h5 class="card-title">Kayıtlı Seferler</h5>
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th>Sefer</th>
+                  <th>Tarih</th>
+                  <th>Saat</th>
+                  <th>İptal</th>
+                  <th>Düzenle</th>
+                </tr>
+              </thead>
+              <tbody>
+                <?php if (empty($trips)): ?>
+                  <tr><td colspan="3" class="text-center">Firmanıza kayıtlı sefer bulunmamaktadır..</td></tr>
+                <?php else: ?>
+                  <?php foreach ($trips as $trip): ?>
+                    <tr>
+                      <td><?= htmlspecialchars($trip['departure_city']) ?> → <?= htmlspecialchars($trip['destination_city']) ?></td>
+                      <td><?= date('d M Y  h:m', strtotime($trip['departure_time'])) ?></td>
+                      <td><?= date('H:m', strtotime($trip['departure_time'])) ?></td>
+                      <td>
+                        <form action="cancel_trip.php" method="POST" style="display:inline;">
+                        <input type="hidden" name="trip_id" value="<?= htmlspecialchars($trip['id']) ?>">
+                        <button type="submit" class="btn btn-danger btn-sm">Cancel</button>
+                        </form>
+                      </td>
+                      <td>
+                        <form action="edit_trip.php" method="POST" style="display:inline;">
+                        <input type="hidden" name="trip_id" value="<?= htmlspecialchars($trip['id']) ?>">
+                        <a href="edit_trip.php?trip_id=<?= $trip['id'] ?>" class="btn btn-sm btn-warning">Düzenle</a>
+                        </form>
+                      </td>
+                    </tr>
+                  <?php endforeach; ?>
+                <?php endif; ?>
+              </tbody>
+            </table>
+            <div class="mt-3 text-end">
+                <a href="sefer_ekle.php" class="btn btn-danger">Sefer Ekle</a>
+            </div>
+            <h5 class="card-title">Kayıtlı Kuponlar</h5>
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th>Kod</th>
+                  <th>İndirim</th>
+                  <th>Limit</th>
+                  <th>Son Kullanma Tarihi</th>
+                  <th>Düzenle</th>
+                  <th>Sil</th>
+                </tr>
+              </thead>
+              <tbody>
+                <?php if (empty($coupons)): ?>
+                  <tr><td colspan="3" class="text-center">Firmanıza kayıtlı Kupon bulunmamaktadır..</td></tr>
+                <?php else: ?>
+                  <?php foreach ($coupons as $coupon): ?>
+                    <tr>
+                      <td><?= htmlspecialchars($coupon['code']) ?></td>
+                      <td>₺<?= number_format($coupon['discount'], 2, ',', '.') ?></td>
+                      <td><?= htmlspecialchars($coupon['usage_limit']) ?></td>
+                      <td><?= date('Y-m-d H:i', strtotime($coupon['expire_date'])) ?></td>
+                      <td>
+                        <form action="cancel_coupon.php" method="POST" style="display:inline;">
+                            <input type="hidden" name="coupon_id" value="<?= htmlspecialchars($coupon['id']) ?>">
+                            <button type="submit" class="btn btn-danger btn-sm">Cancel</button>
+                        </form>
+                      </td>
+                      <td>
+                        <a href="edit_coupon.php?coupon_id=<?= htmlspecialchars($coupon['id']) ?>" class="btn btn-sm btn-warning">Düzenle</a>
+                      </td>
+                    </tr>
+                  <?php endforeach; ?>
+                <?php endif; ?>
+              </tbody>
+            </table>
+            <div class="mt-3 text-end">
+                <a href="add_coupon.php" class="btn btn-danger">Kupon Ekle</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<?php include 'footer.php'; ?>

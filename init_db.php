@@ -57,13 +57,11 @@ try {
     '2025-10-13 08:00:00', '2025-10-13 13:00:00', 300, 50
     ]);
 
-    // Trip 3
     $stmt->execute([
         $tripId3, $companyId1, 'Bursa', 'Istanbul',
         '2025-10-14 10:00:00', '2025-10-14 12:30:00', 180, 40
     ]);
 
-    // Trip 4
     $stmt->execute([
         $tripId4, $companyId2, 'Antalya', 'Istanbul',
         '2025-10-15 07:30:00', '2025-10-15 14:00:00', 450, 55
