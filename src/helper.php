@@ -9,6 +9,7 @@ function uuid()
     return vsprintf('%s%s-%s-%s-%s-%s%s%s', str_split(bin2hex($data), 4));
 }
 
+// Validate registration
 function validate_registration($full_name, $email, $password) {
     if (empty($full_name) || empty($email) || empty($password)) {
         return ['success' => false, 'message' => 'All fields are required.'];
@@ -22,6 +23,7 @@ function validate_registration($full_name, $email, $password) {
     return ['success' => true];
 }
 
+// Book ticket
 function book_ticket($trip_id, $user_id) {
     require __DIR__ . '/db_connect.php';
     // Check trip exists and has capacity
@@ -74,10 +76,20 @@ function book_ticket($trip_id, $user_id) {
 // Get balance
 function get_user_balance($user_id) {
     require __DIR__ . '/db_connect.php';
-    $stmt = $db->prepare('SELECT balance, full_name FROM User WHERE id = :id');
-    $stmt->execute([':id' => $user_id]);
-    return $stmt->fetch(PDO::FETCH_ASSOC);
+    
+    $stmt = $db->prepare('SELECT balance, full_name FROM User WHERE id = :id LIMIT 1');
+    $stmt->bindValue(':id', $user_id, PDO::PARAM_STR);
+    $stmt->execute();
+
+    $user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if ($user && isset($user['balance'])) {
+        $user['balance'] = (float) $user['balance'];
+    return $user;
+    }
 }
+
+
 
 // Get user tickets
 function get_user_tickets($user_id, $limit = 5) {
@@ -94,6 +106,7 @@ function get_user_tickets($user_id, $limit = 5) {
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
+// Get company trips
 function get_company_trips($company_id) {
     require __DIR__ . '/db_connect.php';
     $stmt = $db->prepare('SELECT id, company_id, destination_city, departure_city, departure_time, price capacity, created_date
@@ -104,8 +117,17 @@ function get_company_trips($company_id) {
     $stmt->execute();
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
+function get_company_trip($trip_id) {
+    global $db;
+    $stmt = $db->prepare('SELECT * FROM Trips WHERE id = :id LIMIT 1');
+    $stmt->bindValue(':id', $trip_id);
+    $stmt->execute();
+    return $stmt->fetch(PDO::FETCH_ASSOC);
+}
 
 
+
+// Register trip
 function registerTrip($destination_city, $departure_city, $departure_time, $arrival_time, $price, $capacity, $company_id)
 {
     global $db;
@@ -140,6 +162,161 @@ function registerTrip($destination_city, $departure_city, $departure_time, $arri
         return ['success' => true, 'message' => 'Sefer başarıyla eklendi.'];
     } else {
         return ['success' => false, 'message' => 'Sefer eklenirken bir hata oluştu.'];
+    }
+}
+
+function cancel_trip($id) {
+    global $db;
+    $stmt = $db->prepare("DELETE FROM Trips WHERE id = :id");
+    $stmt->bindValue(':id', $id);
+    $result = $stmt->execute();
+    if ($result) {
+        return ['success' => true, 'message' => 'Sefer başarıyla kaldırılıd.'];
+    } else {
+        return ['success' => false, 'message' => 'Sefer kaldırılırken bir hata oluştu.'];
+    }
+}
+
+function edit_trip($trip_id, $destination_city, $departure_city, $departure_time, $arrival_time, $price, $capacity, $company_id) {
+    global $db;
+
+    $trip_id = trim($trip_id ?? '');
+    $destination_city = trim($destination_city ?? '');
+    $departure_city = trim($departure_city ?? '');
+    $departure_time = trim($departure_time ?? '');
+    $arrival_time = trim($arrival_time ?? '');
+    $price = trim($price ?? '');
+    $capacity = trim($capacity ?? '');
+    $company_id = trim($company_id ?? '');
+
+    if (!$destination_city || !$departure_city || !$departure_time || !$arrival_time || !$price || !$capacity) {
+         return ['success' => false, 'message' => 'All fields are required.'];
+    }
+
+    $stmt = $db->prepare("UPDATE Trips 
+        SET destination_city = :destination_city,
+            departure_city = :departure_city,
+            departure_time = :departure_time,
+            arrival_time = :arrival_time,
+            price = :price,
+            capacity = :capacity
+        WHERE id = :trip_id AND company_id = :company_id");
+
+    $stmt->bindValue(':destination_city', $destination_city, PDO::PARAM_STR);
+    $stmt->bindValue(':departure_city', $departure_city, PDO::PARAM_STR);
+    $stmt->bindValue(':departure_time', $departure_time, PDO::PARAM_STR);
+    $stmt->bindValue(':arrival_time', $arrival_time, PDO::PARAM_STR);
+    $stmt->bindValue(':price', $price, PDO::PARAM_INT);
+    $stmt->bindValue(':capacity', $capacity, PDO::PARAM_INT);
+    $stmt->bindValue(':trip_id', $trip_id);
+    $stmt->bindValue(':company_id', $company_id);
+
+    $result = $stmt->execute();
+
+    if ($result) {
+        return ['success' => true, 'message' => 'Sefer başarıyla güncellendi.'];
+    } else {
+        return ['success' => false, 'message' => 'Sefer güncellenirken bir hata oluştu.'];
+    }
+}
+
+function add_coupon($code, $discount, $usage_limit, $expire_date, $company_id) {
+    global $db;
+    $id = uuid();
+    $code = trim($code ?? '');
+    $discount = trim($discount ?? '');
+    $usage_limit = trim($usage_limit ?? '');
+    $expire_date = trim($expire_date ?? '');
+    $company_id = trim($company_id ?? '');
+
+    if (!$code || !$discount || !$usage_limit || !$expire_date || !$company_id) {
+         return ['success' => false, 'message' => 'All fields are required.'];
+    }
+
+    $stmt = $db->prepare("SELECT id FROM `Coupons` WHERE code = :code AND company_id = :company_id");
+    $stmt->execute([':code' => $code, ':company_id' => $company_id]);
+    if ($stmt->fetch(PDO::FETCH_ASSOC)) {
+        return ['success' => false, 'message' => 'Coupon code already exists.'];
+    }
+    else {
+        $stmt = $db->prepare("INSERT INTO `Coupons` (id, code, discount, usage_limit, expire_date, company_id) VALUES (:id, :code, :discount, :usage_limit, :expire_date, :company_id)");
+        $result = $stmt->execute([
+        ':id' => $id,
+        ':code' => $code,
+        ':discount' => $discount,
+        ':usage_limit' => $usage_limit,
+        ':expire_date' => $expire_date,
+        ':company_id' => $company_id
+    ]);
+        if ($result) {
+            return ['success' => true, 'message' => 'Coupon added successfully.'];
+        } else {
+            return ['success' => false, 'message' => 'Error adding coupon.'];
+        }
+    }
+}
+
+function get_company_coupons($company_id) {
+    global $db;
+    $stmt = $db->prepare('SELECT * FROM Coupons WHERE company_id = :company_id ORDER BY created_at DESC');
+    $stmt->bindValue(':company_id', $company_id, PDO::PARAM_STR);
+    $stmt->execute();
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+function get_company_coupon($coupon_id) {
+    global $db;
+    $stmt = $db->prepare('SELECT * FROM Coupons WHERE id = :id LIMIT 1');
+    $stmt->bindValue(':id', $coupon_id, PDO::PARAM_STR);
+    $stmt->execute();
+    return $stmt->fetch(PDO::FETCH_ASSOC);
+}
+
+function edit_coupon($coupon_id, $code, $discount, $usage_limit, $expire_date, $company_id) {
+    global $db;
+
+    $coupon_id = trim($coupon_id ?? '');
+    $code = trim($code ?? '');
+    $discount = trim($discount ?? '');
+    $usage_limit = trim($usage_limit ?? '');
+    $expire_date = trim($expire_date ?? '');
+    $company_id = trim($company_id ?? '');
+
+    if (!$coupon_id || !$code || !$discount || !$usage_limit || !$expire_date || !$company_id) {
+         return ['success' => false, 'message' => 'All fields are required.'];
+    }
+
+    $stmt = $db->prepare("UPDATE Coupons 
+        SET code = :code,
+            discount = :discount,
+            usage_limit = :usage_limit,
+            expire_date = :expire_date
+        WHERE id = :id AND company_id = :company_id");
+
+    $stmt->bindValue(':code', $code, PDO::PARAM_STR);
+    $stmt->bindValue(':discount', $discount, PDO::PARAM_INT);
+    $stmt->bindValue(':usage_limit', $usage_limit, PDO::PARAM_INT);
+    $stmt->bindValue(':expire_date', $expire_date, PDO::PARAM_STR);
+    $stmt->bindValue(':id', $coupon_id, PDO::PARAM_STR);
+    $stmt->bindValue(':company_id', $company_id, PDO::PARAM_STR);
+
+    $result = $stmt->execute();
+
+    if ($result) {
+        return ['success' => true, 'message' => 'Kupon başarıyla güncellendi.'];
+    } else {
+        return ['success' => false, 'message' => 'Kupon güncellenirken bir hata oluştu.'];
+    }
+}
+
+function cancel_coupon($id) {
+    global $db;
+    $stmt = $db->prepare("DELETE FROM Coupons WHERE id = :id");
+    $stmt->bindValue(':id', $id);
+    $result = $stmt->execute();
+    if ($result) {
+        return ['success' => true, 'message' => 'Kupon başarıyla kaldırılıd.'];
+    } else {
+        return ['success' => false, 'message' => 'Kupon kaldırılırken bir hata oluştu.'];
     }
 }
 ?>

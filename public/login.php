@@ -1,7 +1,7 @@
 <?php
 session_start();
 require_once __DIR__ . '/../src/auth.php';
-
+require_once __DIR__ . '/../src/helper.php';
 $error = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -10,8 +10,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $result = loginUser($email, $password);
 
   if ($result['success']) {
-    header("Location: /dashboard.php");
-    exit;
+      header("Location: /dashboard.php");
+      exit;
   } else {
     $error = $result['message'];
   }

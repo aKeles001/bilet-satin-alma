@@ -43,7 +43,7 @@ include 'header.php';
               <div class="alert alert-success"><?= htmlspecialchars($success) ?></div>
               <script>
                   setTimeout(function() {
-                      window.location.href = "dashboard.php";
+                      window.location.href = "company_panel.php";
                   }, 2000);
               </script>
           <?php endif; ?>

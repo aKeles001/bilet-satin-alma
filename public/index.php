@@ -15,7 +15,7 @@ include 'header.php';
           <form action="searchresults.php" method="GET">
             <div class="row g-3 align-items-end">
 
-              <!-- Departure Input -->
+              <!-- Kalkış -->
               <div class="col-md">
                 <label for="fromInput" class="form-label fw-bold">Kalkış</label>
                 <div class="input-group">
@@ -24,7 +24,7 @@ include 'header.php';
                 </div>
               </div>
 
-              <!-- Arrival Input -->
+              <!-- Varış -->
               <div class="col-md">
                 <label for="toInput" class="form-label fw-bold">Varış</label>
                 <div class="input-group">
@@ -33,7 +33,7 @@ include 'header.php';
                 </div>
               </div>
 
-              <!-- Date Input -->
+              <!-- Tarih -->
               <div class="col-md">
                 <label for="dateInput" class="form-label fw-bold">Tarih</label>
                 <div class="input-group">
@@ -42,7 +42,6 @@ include 'header.php';
                 </div>
               </div>
 
-              <!-- Submit Button -->
               <div class="col-md-auto">
                 <button class="btn btn-dark btn-lg w-100" type="submit">
                   <i class="bi bi-search me-1"></i> Ara

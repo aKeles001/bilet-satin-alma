@@ -3,30 +3,26 @@ session_start();
 require_once __DIR__ . '/../src/auth.php';
 requireLogin();
 include 'header.php';
+
 $user_role = $_SESSION['role'] ?? 'user';
 $user_id = $_SESSION['user_id'];
 $company_id = $_SESSION['company_id'];
 $full_name = $_SESSION['full_name'] ?? '';
 
-if (isCompany()) {
-    $tickets = get_company_trips($company_id);
-    $user = get_user_balance($user_id);
-    $balance = $user ? $user['balance'] : 0;
-} else {
-    $user = get_user_balance($user_id);
-    $balance = $user ? $user['balance'] : 0;
-    $tickets = get_user_tickets($user_id, 20);
-}
+
+$balance = get_user_balance($user_id);
+$tickets = get_user_tickets($user_id, 20);
+
 ?>
 <div class="main-content">
   <div class="container">
-  <h2 class="mb-4">Hoşgeldin, <?= htmlspecialchars($full_name) ?> 👋</h2>
+  <h2 class="mb-4">Hoşgeldin, <?= htmlspecialchars($full_name) ?></h2>
     <div class="row g-4">
       <div class="col-md-4">
         <div class="card text-center shadow-sm">
           <div class="card-body">
             <h5 class="card-title">Bakiye</h5>
-            <p class="display-6 text-success">₺<?= htmlspecialchars(number_format($balance, 2)) ?></p>
+            <p class="display-6 text-success">₺<?= htmlspecialchars(string: number_format($balance['balance'], 2)) ?></p>
           </div>
         </div>
       </div>
@@ -51,11 +47,9 @@ if (isCompany()) {
                     <tr>
                       <td><?= htmlspecialchars($ticket['departure_city']) ?> → <?= htmlspecialchars($ticket['destination_city']) ?></td>
                       <td><?= date('d M Y  h:m', strtotime($ticket['departure_time'])) ?></td>
-                      <td><?= date('h:m', strtotime($ticket['departure_time'])) ?></td>
+                      <td><?= date('H:m', strtotime($ticket['departure_time'])) ?></td>
                       <td>
-                        <?php if ($user_role === 'company'): ?>
-                          <span class="badge bg-success">Test</span>
-                        <?php elseif ($ticket['status'] === 'active'): ?>
+                        <?php if ($ticket['status'] === 'active'): ?>
                           <span class="badge bg-success">Aktif</span>
                         <?php elseif ($ticket['status'] === 'cancelled'): ?>
                           <span class="badge bg-danger">İptal</span>
@@ -75,8 +69,7 @@ if (isCompany()) {
             <?php endif; ?>
             <?php if (isCompany()): ?>
                 <div class="mt-3 text-end">
-                    <a href="admin.php" class="btn btn-danger">Firma Admin Panel</a>
-                    <a href="sefer_ekle.php" class="btn btn-danger">Sefer Ekle</a>
+                    <a href="company_panel.php" class="btn btn-danger">Firma Admin Panel</a>
                 </div>
             <?php endif; ?>
           </div>
