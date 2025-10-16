@@ -50,11 +50,11 @@ include 'header.php';
           <form method="POST" action="">
               <div class="mb-3">
                   <label class="form-label">Başlangıç</label>
-                  <input type="text" name="destination_city" class="form-control" required>
+                  <input type="text" name="departure_city" class="form-control" required>
               </div>
               <div class="mb-3">
                   <label class="form-label">Bitiş</label>
-                  <input type="text" name="departure_city" class="form-control" required>
+                  <input type="text" name="destination_city" class="form-control" required>
               </div>
               <div class="mb-3">
                   <label class="form-label">Çıkış Tarihi ve Saati</label>

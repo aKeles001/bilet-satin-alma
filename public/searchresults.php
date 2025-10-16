@@ -30,7 +30,7 @@ $trips = searchTrips($departureCity, $destinationCity, $departureDate);
                                 <strong>Kalkış:</strong> <?= date('d-m-Y H:i', strtotime($trip['departure_time'])) ?><br>
                                 <strong>Varış:</strong> <?= date('d-m-Y H:i', strtotime($trip['arrival_time'])) ?><br>
                                 <strong>Fiyat:</strong> ₺<?= number_format($trip['price'], 2) ?><br>
-                                <strong>Kapasite:</strong> <?= $trip['capacity'] ?>
+                                <strong>Kapasite:</strong> <?= $trip['capacity'] - available_seats(trip_id: $trip['id']) ?>
                             </p>
                             <a href="book_ticket.php?trip_id=<?= $trip['id'] ?>" class="btn btn-primary">Bilet Satın Al</a>
                         </div>

@@ -10,8 +10,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $result = loginUser($email, $password);
 
   if ($result['success']) {
+    if (isAdmin()) {
+      header("Location: /admin_panel.php");
+      exit;
+    }
+    elseif (isCompany()) {
+      header("Location: /company_dashboard.php");
+      exit;
+    } 
+    else {
       header("Location: /dashboard.php");
       exit;
+    }
   } else {
     $error = $result['message'];
   }
