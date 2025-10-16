@@ -26,7 +26,7 @@ function validate_registration($full_name, $email, $password) {
 // Book ticket
 function book_ticket($trip_id, $user_id) {
     require __DIR__ . '/db_connect.php';
-    // Check trip exists and has capacity
+
     $stmt = $db->prepare('SELECT capacity, price FROM Trips WHERE id = :trip_id');
     $stmt->execute([':trip_id' => $trip_id]);
     $trip = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -34,9 +34,7 @@ function book_ticket($trip_id, $user_id) {
         return ['success' => false, 'message' => 'Trip not found.'];
     }
     // Seat check
-    $stmt = $db->prepare('SELECT COUNT(*) FROM Tickets WHERE trip_id = :trip_id AND status = "active"');
-    $stmt->execute([':trip_id' => $trip_id]);
-    $booked = $stmt->fetchColumn();
+    $booked = available_seats($trip_id);
     if ($booked >= $trip['capacity']) {
         return ['success' => false, 'message' => 'No seats available.'];
     }
@@ -68,9 +66,6 @@ function book_ticket($trip_id, $user_id) {
         ':ticket_id' => $ticket_id,
         ':seat_number' => $seat_number
     ]);
-
-    $stmt = $db->prepare('UPDATE Trips SET capacity = capacity - 1 WHERE id = :trip_id');
-    $stmt->execute([':trip_id' => $trip_id]);
     return ['success' => true, 'message' => 'Ticket booked successfully! Seat: ' . $seat_number, 'ticket_id' => $ticket_id, 'seat_number' => $seat_number];
 }
 // Get balance
@@ -93,7 +88,7 @@ function get_user_balance($user_id) {
 
 // Get user tickets
 function get_user_tickets($user_id, $limit = 5) {
-    require __DIR__ . '/db_connect.php';
+    global $db;
     $stmt = $db->prepare('SELECT t.id, tr.departure_city, tr.destination_city, tr.departure_time, t.status
         FROM Tickets t
         JOIN Trips tr ON t.trip_id = tr.id
@@ -318,5 +313,79 @@ function cancel_coupon($id) {
     } else {
         return ['success' => false, 'message' => 'Kupon kaldırılırken bir hata oluştu.'];
     }
+}
+
+function get_company_tickets($company_id) {
+    global $db;
+    $stmt = $db->prepare('SELECT t.id, tr.departure_city, tr.destination_city, tr.departure_time, t.status, tr.capacity, u.full_name
+        FROM Tickets t
+        JOIN Trips tr ON t.trip_id = tr.id
+        JOIN User u ON t.user_id = u.id
+        WHERE tr.company_id = :company_id
+        ORDER BY t.created_at DESC');
+    $stmt->bindValue(':company_id', $company_id);
+    $stmt->execute();
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
+function cancel_ticket($id) {
+    global $db;
+    $db->beginTransaction();
+
+    try {
+        $stmt_update = $db->prepare(
+            "UPDATE Tickets SET status = 'cancelled' WHERE id = :id AND status = 'active'"
+        );
+        $stmt_update->bindValue(':id', $id);
+        $stmt_update->execute();
+
+        if ($stmt_update->rowCount() > 0) {
+
+            $stmt_info = $db->prepare("SELECT user_id, total_price FROM Tickets WHERE id = :id");
+            $stmt_info->bindValue(':id', $id);
+            $stmt_info->execute();
+            $ticket = $stmt_info->fetch(PDO::FETCH_ASSOC);
+
+
+            $stmt_refund = $db->prepare('UPDATE User SET balance = balance + :price WHERE id = :user_id');
+            $stmt_refund->bindValue(':price', $ticket['total_price']);
+            $stmt_refund->bindValue(':user_id', $ticket['user_id']);
+            $stmt_refund->execute();
+
+
+            $stmt_delete = $db->prepare("DELETE FROM Booked_Seats WHERE ticket_id = :ticket_id");
+            $stmt_delete->bindValue(':ticket_id', $id);
+            $stmt_delete->execute();
+
+
+            $db->commit();
+            return ['success' => true, 'message' => 'Bilet başarıyla iptal edildi ve ücret iadesi yapıldı.'];
+        } else {
+            $db->rollBack();
+            return ['success' => false, 'message' => 'Bilet iptal edilemedi. Bilet bulunamadı veya zaten aktif değildi.'];
+        }
+    } catch (Exception $e) {
+        $db->rollBack();
+        error_log($e->getMessage());
+        return ['success' => false, 'message' => 'İşlem sırasında bir veritabanı hatası oluştu.'];
+    }
+}
+function delete_ticket_history($id) {
+    global $db;
+    $stmt = $db->prepare("DELETE FROM Tickets WHERE id = :id AND status = 'cancelled'");
+    $stmt->bindValue(':id', $id);
+    $result = $stmt->execute();
+    if ($result) {
+        return ['success' => true, 'message' => 'Bilet geçmişi başarıyla silindi.'];
+    } else {
+        return ['success' => false, 'message' => 'Bilet geçmişi silinirken bir hata oluştu.'];
+    }
+}
+function available_seats($trip_id) {
+    global $db;
+    $stmt = $db->prepare('SELECT COUNT(*) FROM Tickets WHERE trip_id = :trip_id AND status = "active"');
+    $stmt->execute([':trip_id' => $trip_id]);
+    $booked = $stmt->fetchColumn();
+    return $booked;
 }
 ?>

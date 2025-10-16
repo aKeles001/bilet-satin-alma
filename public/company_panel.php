@@ -11,6 +11,7 @@ $full_name = $_SESSION['full_name'] ?? '';
 
 $trips = get_company_trips($company_id);
 $coupons = get_company_coupons($company_id);
+$tickets = get_company_tickets($company_id);
 
 ?>
 <div class="main-content">
@@ -62,7 +63,7 @@ $coupons = get_company_coupons($company_id);
               </tbody>
             </table>
             <div class="mt-3 text-end">
-                <a href="sefer_ekle.php" class="btn btn-danger">Sefer Ekle</a>
+                <a href="sefer_ekle.php" class="btn btn-success">Sefer Ekle</a>
             </div>
             <h5 class="card-title">Kayıtlı Kuponlar</h5>
             <table class="table table-striped">
@@ -101,8 +102,57 @@ $coupons = get_company_coupons($company_id);
               </tbody>
             </table>
             <div class="mt-3 text-end">
-                <a href="add_coupon.php" class="btn btn-danger">Kupon Ekle</a>
+                <a href="add_coupon.php" class="btn btn-success">Kupon Ekle</a>
             </div>
+            <h5 class="card-title mt-4">Satılan Biletler</h5>
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th>Sefer</th>
+                  <th>Tarih</th>
+                  <th>Saat</th>
+                  <th>İsim</th>
+                  <th>Durum</th>
+                  <th>İptal Et</th>
+                  <th>Sil</th>
+                </tr>
+              </thead>
+              <tbody>
+                <?php if (empty($tickets)): ?>
+                  <tr><td colspan="3" class="text-center">Kayıtlı bilet bulunamadı.</td></tr>
+                <?php else: ?>
+                  <?php foreach ($tickets as $ticket): ?>
+                    <tr>
+                      <td><?= htmlspecialchars($ticket['departure_city']) ?> → <?= htmlspecialchars($ticket['destination_city']) ?></td>
+                      <td><?= date('d M Y  h:m', strtotime($ticket['departure_time'])) ?></td>
+                      <td><?= date('H:m', strtotime($ticket['departure_time'])) ?></td>
+                      <td><?= htmlspecialchars($ticket['full_name']) ?></td>
+                      <td>
+                        <?php if ($ticket['status'] === 'active'): ?>
+                          <span class="badge bg-success">Aktif</span>
+                        <?php elseif ($ticket['status'] === 'cancelled'): ?>
+                          <span class="badge bg-danger">İptal Edildi</span>
+                        <?php else: ?>
+                          <span class="badge bg-secondary">Süresi Doldu</span>
+                        <?php endif; ?>
+                      </td>
+                      <td>
+                        <form action="cancel_ticket.php" method="POST" style="display:inline;">
+                            <input type="hidden" name="ticket_id" value="<?= htmlspecialchars($ticket['id']) ?>">
+                            <button type="submit" class="btn btn-danger btn-sm">İptal Et</button>
+                        </form>
+                      </td>
+                      <td>
+                        <form action="delete_history.php" method="POST" style="display:inline;">
+                            <input type="hidden" name="ticket_id" value="<?= htmlspecialchars($ticket['id']) ?>">
+                            <button type="submit" class="btn btn-secondary btn-sm">Sil</button>
+                        </form>
+                      </td>
+                    </tr>
+                  <?php endforeach; ?>
+                <?php endif; ?>
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
