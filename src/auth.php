@@ -52,14 +52,14 @@ function isCompany()
 {
     return isset($_SESSION['role']) && $_SESSION['role'] === 'company';
 }
-function registerUser($full_name, $email, $password)
+function registerUser($full_name, $email, $password, $company_id = null)
 {
     global $db;
 
     $full_name = trim($full_name ?? '');
     $email = trim($email ?? '');
     $password = trim($password ?? '');
-
+    $company_id = trim($company_id ?? '');
     if (!$full_name || !$email || !$password) {
         return ['success' => false, 'message' => 'All fields are required.'];
     }
@@ -73,12 +73,13 @@ function registerUser($full_name, $email, $password)
     $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
     $id = uuid();
 
-    $stmt = $db->prepare("INSERT INTO `User` (id, full_name, email, password) VALUES (:id, :full_name, :email, :password)");
+    $stmt = $db->prepare("INSERT INTO `User` (id, full_name, email, password, company_id) VALUES (:id, :full_name, :email, :password, :company_id)");
     $result = $stmt->execute([
         ':id' => $id,
         ':full_name' => $full_name,
         ':email' => $email,
-        ':password' => $hashedPassword
+        ':password' => $hashedPassword,
+        ':company_id' => $company_id,
     ]);
 
     if ($result) {

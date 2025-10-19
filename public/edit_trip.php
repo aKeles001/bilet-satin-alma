@@ -50,7 +50,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $success = $result['message'];
         echo "<script>
                 setTimeout(function() {
-                    window.location.href = 'company_dashboard.php';
+                    window.location.href = 'company_panel.php';
                 }, 2000);
               </script>";
     } else {

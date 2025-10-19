@@ -6,12 +6,10 @@ requireLogin();
 include 'header.php';
 
 $user_id = $_SESSION['user_id'];
-$company_id = $_SESSION['company_id'];
 $full_name = $_SESSION['full_name'] ?? '';
 
-$trips = get_company_trips($company_id);
-$coupons = get_company_coupons($company_id);
-$tickets = get_company_tickets($company_id);
+$companies = get_companies();
+$coupons = get_coupons($user_id);
 
 ?>
 <div class="main-content">
@@ -25,36 +23,31 @@ $tickets = get_company_tickets($company_id);
       <div class="col-md-8">
         <div class="card shadow-sm">
           <div class="card-body">
-            <h5 class="card-title">Kayıtlı Seferler</h5>
+            <h5 class="card-title">Kayıtlı Firmalar</h5>
             <table class="table table-striped">
               <thead>
                 <tr>
-                  <th>Sefer</th>
-                  <th>Tarih</th>
-                  <th>Saat</th>
-                  <th>İptal</th>
-                  <th>Düzenle</th>
+                  <th>Firma İsimleri</th>
+                  <th>Firma Admin İsimleri</th>
+                  <th>Firma Admin E-Mail</th>
+                  <th>Firma ID</th>
+                  <th>Firma Kupon Tanımla</th>
                 </tr>
               </thead>
               <tbody>
-                <?php if (empty($trips)): ?>
-                  <tr><td colspan="3" class="text-center">Firmanıza kayıtlı sefer bulunmamaktadır..</td></tr>
+                <?php if (empty($companies)): ?>
+                  <tr><td colspan="3" class="text-center">Kayıtlı Firma Bulunamadı..</td></tr>
                 <?php else: ?>
-                  <?php foreach ($trips as $trip): ?>
+                  <?php foreach ($companies as $company): ?>
                     <tr>
-                      <td><?= htmlspecialchars($trip['departure_city']) ?> → <?= htmlspecialchars($trip['destination_city']) ?></td>
-                      <td><?= date('d M Y  h:m', strtotime($trip['departure_time'])) ?></td>
-                      <td><?= date('H:m', strtotime($trip['departure_time'])) ?></td>
+                      <td><?= htmlspecialchars($company['name']) ?>
+                      <td><?= htmlspecialchars($company['full_name']) ?>
+                      <td><?= htmlspecialchars($company['email']) ?>
+                      <td><?= htmlspecialchars($company['id']) ?>
                       <td>
-                        <form action="cancel_trip.php" method="POST" style="display:inline;">
-                        <input type="hidden" name="trip_id" value="<?= htmlspecialchars($trip['id']) ?>">
-                        <button type="submit" class="btn btn-danger btn-sm">Cancel</button>
-                        </form>
-                      </td>
-                      <td>
-                        <form action="edit_trip.php" method="POST" style="display:inline;">
-                        <input type="hidden" name="trip_id" value="<?= htmlspecialchars($trip['id']) ?>">
-                        <a href="edit_trip.php?trip_id=<?= $trip['id'] ?>" class="btn btn-sm btn-warning">Düzenle</a>
+                        <form action="add_coupon.php" method="POST" style="display:inline;">
+                            <input type="hidden" name="company_id" value="<?= htmlspecialchars($company['id']) ?>">
+                            <button type="submit" class="btn btn-success btn-sm">Tanımla</button>
                         </form>
                       </td>
                     </tr>
@@ -63,7 +56,7 @@ $tickets = get_company_tickets($company_id);
               </tbody>
             </table>
             <div class="mt-3 text-end">
-                <a href="sefer_ekle.php" class="btn btn-success">Sefer Ekle</a>
+              <a href="add_company.php" class="btn btn-success">Firma Ekle</a>
             </div>
             <h5 class="card-title">Kayıtlı Kuponlar</h5>
             <table class="table table-striped">
@@ -94,9 +87,9 @@ $tickets = get_company_tickets($company_id);
                         </form>
                       </td>
                       <td>
-                      <form action="edit_coupon.php" method="POST" style="display:inline;">
+                        <form action="edit_coupon.php" method="POST" style="display:inline;">
                             <input type="hidden" name="coupon_id" value="<?= htmlspecialchars($coupon['id']) ?>">
-                            <input type="hidden" name="company_id" value="<?= htmlspecialchars($company_id) ?>">
+                            <input type="hidden" name="company_id" value="<?= htmlspecialchars($coupon['company_id']) ?>">
                             <button type="submit" class="btn btn-warning btn-sm">Düzenle</button>
                         </form>
                       </td>
@@ -106,8 +99,12 @@ $tickets = get_company_tickets($company_id);
               </tbody>
             </table>
             <div class="mt-3 text-end">
-                <a href="add_coupon.php" class="btn btn-success">Kupon Ekle</a>
+              <form action="add_coupon.php" method="POST" style="display:inline;">
+                <input type="hidden" name="company_id" value="<?= htmlspecialchars($company['id']) ?>">
+                <button type="submit" class="btn btn-success btn">Kupon Ekle</button>
+              </form>
             </div>
+            
             <h5 class="card-title mt-4">Satılan Biletler</h5>
             <table class="table table-striped">
               <thead>

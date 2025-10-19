@@ -15,7 +15,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       exit;
     }
     elseif (isCompany()) {
-      header("Location: /company_dashboard.php");
+      header("Location: /company_panel.php");
       exit;
     } 
     else {
