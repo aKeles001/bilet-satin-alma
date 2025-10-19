@@ -10,20 +10,33 @@ $success = '';
 requireLogin();
 if (isCompany()) {
     $company_id = $_SESSION['company_id'];
-    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        $code = $_POST['code'] ?? '';
-        $discount = $_POST['discount'] ?? '';
-        $usage_limit = $_POST['usage_limit'] ?? '';
-        $expire_date = $_POST['expire_date'] ?? '';
-        $result = add_coupon($code, $discount, $usage_limit, $expire_date, $company_id);
-        if ($result['success']) {
-            $success = $result['message'];
-        } else {
-            $error = $result['message'];
-        }
+    $code = $_POST['code'] ?? '';
+    $discount = $_POST['discount'] ?? '';
+    $usage_limit = $_POST['usage_limit'] ?? '';
+    $expire_date = $_POST['expire_date'] ?? '';
+    $result = add_coupon($code, $discount, $usage_limit, $expire_date, company_id: $company_id);
+    if ($result['success']) {
+        $success = $result['message'];
+    } else {
+        $error = $result['message'];
     }
 }
-include 'header.php';
+elseif (isAdmin()) {
+    $code = $_POST['code'] ?? '';
+    $discount = $_POST['discount'] ?? '';
+    $usage_limit = $_POST['usage_limit'] ?? '';
+    $expire_date = $_POST['expire_date'] ?? '';
+    $company_id = $_SESSION['user_id'] ?? '';
+    $result = add_admin_coupon($code, $discount, $usage_limit, $expire_date, company_id: $company_id);
+    if ($result['success']) {
+        $success = $result['message'];
+    } else {
+        $error = $result['message'];
+    }
+} else {
+    $error = 'You do not have permission to add a coupon.';
+}
+include 'header.php'
 ?>
 <div class="main-content">
   <div class="d-flex justify-content-center align-items-center" style="min-height: 80vh;">
@@ -33,11 +46,19 @@ include 'header.php';
               <div class="alert alert-danger"><?= htmlspecialchars($error) ?></div>
           <?php endif; ?>
 
-          <?php if ($success): ?>
+          <?php if ($success && isCompany()): ?>
               <div class="alert alert-success"><?= htmlspecialchars($success) ?></div>
               <script>
                   setTimeout(function() {
                       window.location.href = "company_panel.php";
+                  }, 2000);
+              </script>
+          <?php endif; ?>
+          <?php if ($success && isAdmin()): ?>
+              <div class="alert alert-success"><?= htmlspecialchars($success) ?></div>
+              <script>
+                  setTimeout(function() {
+                      window.location.href = "admin_panel.php";
                   }, 2000);
               </script>
           <?php endif; ?>
@@ -58,6 +79,9 @@ include 'header.php';
               <label class="form-label">Son Kullanma Tarihi</label>
               <input type="datetime-local" name="expire_date" class="form-control" required>
               </div>
+              <?php if (isAdmin()): ?>
+                <input type="hidden" name="company_id" value="<?= htmlspecialchars($company_id) ?>">
+              <?php endif; ?>
               <button type="submit" class="btn btn-primary w-100">Tanımla</button>
           </form>
       </div>

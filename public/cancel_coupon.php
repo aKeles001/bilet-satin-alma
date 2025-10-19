@@ -9,7 +9,7 @@ $success = '';
 
 requireLogin();
 
-if (isCompany() && $_SERVER['REQUEST_METHOD'] === 'POST') {
+if ((isCompany() || isAdmin()) && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $coupon_id = $_POST['coupon_id'] ?? '';
     $result = cancel_coupon($coupon_id);
 
@@ -57,11 +57,15 @@ document.addEventListener('DOMContentLoaded', function() {
     <?php endif; ?>
 
     modal.show();
-
-    // Optional: Redirect after closing the modal
+    <?php if (isCompany()): ?>
     const modalElement = document.getElementById('resultModal');
     modalElement.addEventListener('hidden.bs.modal', () => {
         window.location.href = "company_panel.php";
+    <?php elseif (isAdmin()): ?>
+    const modalElement = document.getElementById('resultModal');
+    modalElement.addEventListener('hidden.bs.modal', () => {
+        window.location.href = "admin_panel.php";
+    <?php endif; ?>
     });
 });
 </script>

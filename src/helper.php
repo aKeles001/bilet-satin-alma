@@ -1,5 +1,5 @@
 <?php
-
+require_once __DIR__ . '/../src/auth.php';
 function uuid()
 {
     $data = random_bytes(16);
@@ -251,6 +251,41 @@ function add_coupon($code, $discount, $usage_limit, $expire_date, $company_id) {
     }
 }
 
+function add_admin_coupon($code, $discount, $usage_limit, $expire_date, $company_id) {
+    global $db;
+    $id = uuid();
+    $code = trim($code ?? '');
+    $discount = trim($discount ?? '');
+    $usage_limit = trim($usage_limit ?? '');
+    $expire_date = trim($expire_date ?? '');
+    $company_id = trim($company_id ?? '');
+
+    if (!$code || !$discount || !$usage_limit || !$expire_date) {
+         return ['success' => false, 'message' => 'All fields are required.'];
+    }
+
+    $stmt = $db->prepare("SELECT id FROM `Coupons` WHERE code = :code");
+    $stmt->execute([':code' => $code]);
+    if ($stmt->fetch(PDO::FETCH_ASSOC)) {
+        return ['success' => false, 'message' => 'Coupon code already exists.'];
+    }
+    else {
+        $stmt = $db->prepare("INSERT INTO `Coupons` (id, code, discount, usage_limit, expire_date, company_id) VALUES (:id, :code, :discount, :usage_limit, :expire_date, :company_id)");
+        $result = $stmt->execute([
+        ':id' => $id,
+        ':code' => $code,
+        ':discount' => $discount,
+        ':usage_limit' => $usage_limit,
+        ':expire_date' => $expire_date,
+        ':company_id' => $company_id,
+    ]);
+        if ($result) {
+            return ['success' => true, 'message' => 'Coupon added successfully.'];
+        } else {
+            return ['success' => false, 'message' => 'Error adding coupon.'];
+        }
+    }
+}
 function get_company_coupons($company_id) {
     global $db;
     $stmt = $db->prepare('SELECT * FROM Coupons WHERE company_id = :company_id ORDER BY created_at DESC');
@@ -265,7 +300,16 @@ function get_company_coupon($coupon_id) {
     $stmt->execute();
     return $stmt->fetch(PDO::FETCH_ASSOC);
 }
-
+function get_coupons($id){
+    global $db;
+    $stmt = $db->prepare('SELECT *
+    FROM Coupons
+    WHERE company_id = :id
+    ORDER BY code ASC');
+    $stmt->bindValue(':id', $id);
+    $stmt->execute();
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
 function edit_coupon($coupon_id, $code, $discount, $usage_limit, $expire_date, $company_id) {
     global $db;
 
@@ -387,5 +431,42 @@ function available_seats($trip_id) {
     $stmt->execute([':trip_id' => $trip_id]);
     $booked = $stmt->fetchColumn();
     return $booked;
+}
+
+function get_companies() {
+    global $db;
+    $stmt = $db->prepare('SELECT b.id, b.name, u.full_name, u.email, u.company_id
+        FROM Bus_Company b
+        JOIN User u ON b.id = u.company_id
+        ORDER BY b.created_at DESC');
+    $stmt->execute();
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
+function add_company($name, $target_path, $full_name, $email, $password) {
+    global $db;
+    $id_b = uuid();
+    $name = trim($name ?? '');
+    $email = trim($_POST['email'] ?? '');
+    $password = trim($_POST['password'] ?? '');
+    $full_name = trim($_POST['full_name'] ?? '');
+    $target_path = trim($target_path ?? '');
+    if (!$name || !$target_path || !$full_name || !$email || !$password) {
+         return ['success' => false, 'message' => 'All fields are required.'];
+    }
+    $stmt = $db->prepare('INSERT INTO Bus_Company (id, name, logo_path) VALUES (:id, :name, :logo_path)');
+    $result = $stmt->execute([
+        ':id' => $id_b,
+        ':name' => $name,
+        ':logo_path' => $target_path]);
+    if ($result) {
+        $result = registerUser($full_name, $email, $password, $id_b);
+        if ($result['success']) {
+            return ['success'=> true,'message'=> 'Succssfully added company and '];
+        } else {
+            return ['success'=> false,'message'=> 'Company added but user registration failed: ' . $result['message']];
+        }
+    }
+
 }
 ?>
