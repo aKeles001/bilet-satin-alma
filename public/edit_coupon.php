@@ -9,7 +9,6 @@ requireLogin();
 $error = '';
 $success = '';
 $coupon = [];
-
 if ((isAdmin() || isCompany())){
     if (isCompany()){
         $company_id = $_SESSION['company_id'];}

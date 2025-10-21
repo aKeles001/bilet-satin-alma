@@ -4,7 +4,7 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 require_once __DIR__ . '/db_connect.php';
-include __DIR__ . '/../src/helper.php';
+include_once __DIR__ . '/../src/helper.php';
 function loginUser($email, $password)
 {
     global $db;
@@ -52,7 +52,7 @@ function isCompany()
 {
     return isset($_SESSION['role']) && $_SESSION['role'] === 'company';
 }
-function registerUser($full_name, $email, $password, $company_id = null)
+function registerUser($full_name, $email, $password, $company_id = null, $role = 'user')
 {
     global $db;
 
@@ -63,23 +63,22 @@ function registerUser($full_name, $email, $password, $company_id = null)
     if (!$full_name || !$email || !$password) {
         return ['success' => false, 'message' => 'All fields are required.'];
     }
-    // Check if user exists
     $stmt = $db->prepare("SELECT id FROM `User` WHERE email = :email");
     $stmt->execute([':email' => $email]);
     if ($stmt->fetch(PDO::FETCH_ASSOC)) {
         return ['success' => false, 'message' => 'Email already exists.'];
     }
-
     $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
     $id = uuid();
 
-    $stmt = $db->prepare("INSERT INTO `User` (id, full_name, email, password, company_id) VALUES (:id, :full_name, :email, :password, :company_id)");
+    $stmt = $db->prepare("INSERT INTO `User` (id, full_name, email, password, company_id, role) VALUES (:id, :full_name, :email, :password, :company_id, :role)");
     $result = $stmt->execute([
         ':id' => $id,
         ':full_name' => $full_name,
         ':email' => $email,
         ':password' => $hashedPassword,
         ':company_id' => $company_id,
+        'role'=> $role,
     ]);
 
     if ($result) {

@@ -251,14 +251,14 @@ function add_coupon($code, $discount, $usage_limit, $expire_date, $company_id) {
     }
 }
 
-function add_admin_coupon($code, $discount, $usage_limit, $expire_date, $company_id) {
+function add_admin_coupon($code, $discount, $usage_limit, $expire_date) {
     global $db;
     $id = uuid();
     $code = trim($code ?? '');
     $discount = trim($discount ?? '');
     $usage_limit = trim($usage_limit ?? '');
     $expire_date = trim($expire_date ?? '');
-    $company_id = trim($company_id ?? '');
+    $company_id = null;
 
     if (!$code || !$discount || !$usage_limit || !$expire_date) {
          return ['success' => false, 'message' => 'All fields are required.'];
@@ -288,9 +288,9 @@ function add_admin_coupon($code, $discount, $usage_limit, $expire_date, $company
 }
 function get_company_coupons($company_id) {
     global $db;
-    $stmt = $db->prepare('SELECT * FROM Coupons WHERE company_id = :company_id ORDER BY created_at DESC');
-    $stmt->bindValue(':company_id', $company_id, PDO::PARAM_STR);
-    $stmt->execute();
+        $stmt = $db->prepare('SELECT * FROM Coupons WHERE company_id = :company_id ORDER BY created_at DESC');
+        $stmt->bindValue(':company_id', $company_id, PDO::PARAM_STR);
+        $stmt->execute();
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 function get_company_coupon($coupon_id) {
@@ -300,17 +300,16 @@ function get_company_coupon($coupon_id) {
     $stmt->execute();
     return $stmt->fetch(PDO::FETCH_ASSOC);
 }
-function get_coupons($id){
+function get_admin_coupons(){
     global $db;
     $stmt = $db->prepare('SELECT *
     FROM Coupons
-    WHERE company_id = :id
+    WHERE company_id  IS NULL
     ORDER BY code ASC');
-    $stmt->bindValue(':id', $id);
     $stmt->execute();
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
-function edit_coupon($coupon_id, $code, $discount, $usage_limit, $expire_date, $company_id) {
+function edit_coupon($coupon_id, $code, $discount, $usage_limit, $expire_date, $company_id = null) {
     global $db;
 
     $coupon_id = trim($coupon_id ?? '');
@@ -323,28 +322,48 @@ function edit_coupon($coupon_id, $code, $discount, $usage_limit, $expire_date, $
     if (!$coupon_id || !$code || !$discount || !$usage_limit || !$expire_date || !$company_id) {
          return ['success' => false, 'message' => 'All fields are required.'];
     }
-
-    $stmt = $db->prepare("UPDATE Coupons 
+    if (isCompany() && $company_id) {
+        $stmt = $db->prepare("UPDATE Coupons 
         SET code = :code,
             discount = :discount,
             usage_limit = :usage_limit,
             expire_date = :expire_date
         WHERE id = :id AND company_id = :company_id");
+        $stmt->bindValue(':code', $code, PDO::PARAM_STR);
+        $stmt->bindValue(':discount', $discount, PDO::PARAM_INT);
+        $stmt->bindValue(':usage_limit', $usage_limit, PDO::PARAM_INT);
+        $stmt->bindValue(':expire_date', $expire_date, PDO::PARAM_STR);
+        $stmt->bindValue(':id', $coupon_id, PDO::PARAM_STR);
+        $stmt->bindValue(':company_id', $company_id, PDO::PARAM_STR);
 
-    $stmt->bindValue(':code', $code, PDO::PARAM_STR);
-    $stmt->bindValue(':discount', $discount, PDO::PARAM_INT);
-    $stmt->bindValue(':usage_limit', $usage_limit, PDO::PARAM_INT);
-    $stmt->bindValue(':expire_date', $expire_date, PDO::PARAM_STR);
-    $stmt->bindValue(':id', $coupon_id, PDO::PARAM_STR);
-    $stmt->bindValue(':company_id', $company_id, PDO::PARAM_STR);
+        $result = $stmt->execute();
 
-    $result = $stmt->execute();
+        if ($result) {
+            return ['success' => true, 'message' => 'Kupon başarıyla güncellendi.'];
+        } else {
+            return ['success' => false, 'message' => 'Kupon güncellenirken bir hata oluştu.'];
+        }}
+    elseif (isAdmin()) {
+        $stmt = $db->prepare("UPDATE Coupons 
+        SET code = :code,
+            discount = :discount,
+            usage_limit = :usage_limit,
+            expire_date = :expire_date
+        WHERE id = :id AND company_id IS NULL");
 
-    if ($result) {
-        return ['success' => true, 'message' => 'Kupon başarıyla güncellendi.'];
-    } else {
-        return ['success' => false, 'message' => 'Kupon güncellenirken bir hata oluştu.'];
-    }
+        $stmt->bindValue(':code', $code, PDO::PARAM_STR);
+        $stmt->bindValue(':discount', $discount, PDO::PARAM_INT);
+        $stmt->bindValue(':usage_limit', $usage_limit, PDO::PARAM_INT);
+        $stmt->bindValue(':expire_date', $expire_date, PDO::PARAM_STR);
+        $stmt->bindValue(':id', $coupon_id, PDO::PARAM_STR);
+
+        $result = $stmt->execute();
+
+        if ($result) {
+            return ['success' => true, 'message' => 'Kupon başarıyla güncellendi.'];
+        } else {
+            return ['success' => false, 'message' => 'Kupon güncellenirken bir hata oluştu.'];}
+        }
 }
 
 function cancel_coupon($id) {
@@ -435,13 +454,12 @@ function available_seats($trip_id) {
 
 function get_companies() {
     global $db;
-    $stmt = $db->prepare('SELECT b.id, b.name, u.full_name, u.email, u.company_id
-        FROM Bus_Company b
-        JOIN User u ON b.id = u.company_id
-        ORDER BY b.created_at DESC');
+    $stmt = $db->prepare('SELECT id, name FROM Bus_Company ORDER BY created_at DESC');
     $stmt->execute();
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
+
+
 
 function add_company($name, $target_path, $full_name, $email, $password) {
     global $db;
@@ -460,7 +478,8 @@ function add_company($name, $target_path, $full_name, $email, $password) {
         ':name' => $name,
         ':logo_path' => $target_path]);
     if ($result) {
-        $result = registerUser($full_name, $email, $password, $id_b);
+        $role = 'company';
+        $result = registerUser($full_name, $email, $password, $id_b, $role);
         if ($result['success']) {
             return ['success'=> true,'message'=> 'Succssfully added company and '];
         } else {
@@ -469,4 +488,68 @@ function add_company($name, $target_path, $full_name, $email, $password) {
     }
 
 }
+
+function get_users1(){
+    global $db;
+    $stmt = $db->prepare('SELECT U.*, B.name 
+    FROM User U
+    JOIN Bus_Company B on U.company_id = B.id
+    ORDER BY U.full_name ASC');
+    $stmt->execute();
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
+function get_users() {
+    global $db;
+    $stmt = $db->prepare('SELECT U.*, B.name AS company_name
+        FROM User U
+        LEFT JOIN Bus_Company B ON U.company_id = B.id
+        ORDER BY U.role ASC');
+    $stmt->execute();
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
+
+function cancel_company($id) {
+    global $db;
+
+    try {
+        $db->beginTransaction();
+
+        $stmt = $db->prepare('UPDATE User SET company_id = NULL, role = "user" WHERE company_id = :id');
+        $stmt->bindValue(':id', $id);
+        $stmt->execute();
+
+
+        $stmt = $db->prepare("DELETE FROM Bus_Company WHERE id = :id");
+        $stmt->bindValue(':id', $id);
+        $stmt->execute();
+        $db->commit();
+
+        return ['success' => true, 'message' => 'Company successfully removed. Users unlinked.'];
+
+    } catch (Exception $e) {
+        $db->rollBack();
+        return ['success' => false, 'message' => 'Error: ' . $e->getMessage()];
+    }
+}
+
+function set_company_admin($company_id, $user_id) {
+    global $db;
+    try {
+        $db->beginTransaction();
+        $stmt = $db->prepare('UPDATE User SET company_id = :company_id, role = "company" WHERE id = :user_id');
+        $stmt->bindValue(':company_id', $company_id);
+        $stmt->bindValue(':user_id', $user_id);
+        $stmt->execute();
+        $db->commit();
+
+        return ['success'=> true, 'message'=> 'Company admin set successfully'];
+    }
+    catch (Exception $e) {
+        $db->rollBack();
+        return ['success'=> false, 'message' => 'Error: ' . $e->getMessage()];
+    }
+}
+
 ?>

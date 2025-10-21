@@ -89,7 +89,7 @@ include 'header.php';
               </div>
               <div>
                 <label class="form-label">Admin Şifre</label>
-                <input type="text" name="password" class="form-control" accept="image/*" required>
+                <input type="password" name="password" class="form-control" accept="image/*" required>
               </div>
               <button type="submit" class="btn btn-primary w-100">Tanımla</button>
           </form>
