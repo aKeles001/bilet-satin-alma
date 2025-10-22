@@ -8,27 +8,23 @@ $error = '';
 $success = '';
 requireLogin();
 
-// Only admins can access this page
+
 if (!isAdmin()) {
     die('Unauthorized access.');
 }
 
-// Fetch companies to populate dropdown
 $companies = get_companies();
 
-// Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $company_id = $_POST['company_id'] ?? null; // dropdown or hidden input
+    $company_id = $_POST['company_id'] ?? null;
     $full_name = $_POST['full_name'] ?? '';
     $email = $_POST['email'] ?? '';
     $password = $_POST['password'] ?? '';
 
-    // Validate user input
     $validation = validate_registration($full_name, $email, $password);
     if (!$validation['success']) {
         $error = $validation['message'];
     } else {
-        // Register the user
         $result = registerUser($full_name, $email, $password, $company_id, 'company');
         if ($result['success']) {
             $success = $result['message'];

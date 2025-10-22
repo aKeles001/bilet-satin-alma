@@ -3,7 +3,7 @@ session_start();
 include 'header.php';
 include '../src/tripsearch.php';
 
-// Get user input from GET request
+
 $departureCity = $_GET['from'] ?? '';
 $destinationCity = $_GET['to'] ?? '';
 $departureDate = $_GET['date'] ?? '';
@@ -32,7 +32,7 @@ $trips = searchTrips($departureCity, $destinationCity, $departureDate);
                                 <strong>Fiyat:</strong> ₺<?= number_format($trip['price'], 2) ?><br>
                                 <strong>Kapasite:</strong> <?= $trip['capacity'] - available_seats(trip_id: $trip['id']) ?>
                             </p>
-                            <a href="book_ticket.php?trip_id=<?= $trip['id'] ?>" class="btn btn-primary">Bilet Satın Al</a>
+                            <a href="select_seat.php?trip_id=<?= $trip['id'] ?>" class="btn btn-primary">Koltuk Seç</a>
                         </div>
                     </div>
                 </div>

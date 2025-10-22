@@ -63,7 +63,7 @@ $tickets = get_company_tickets($company_id);
               </tbody>
             </table>
             <div class="mt-3 text-end">
-                <a href="sefer_ekle.php" class="btn btn-success">Sefer Ekle</a>
+                <a href="add_trip.php" class="btn btn-success">Sefer Ekle</a>
             </div>
             <h5 class="card-title">Kayıtlı Kuponlar</h5>
             <table class="table table-striped">

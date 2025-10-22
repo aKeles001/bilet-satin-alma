@@ -551,5 +551,14 @@ function set_company_admin($company_id, $user_id) {
         return ['success'=> false, 'message' => 'Error: ' . $e->getMessage()];
     }
 }
+function getBookedSeats($trip_id) {
+    global $db;
+    $query = $db->prepare("SELECT S.seat_number 
+    FROM Tickets T
+    Join Booked_seats S ON T.id = S.ticket_id
+    WHERE trip_id = :trip_id");
+    $query->execute([$trip_id]);
+    return $query->fetchAll(PDO::FETCH_COLUMN);
+}
 
 ?>
