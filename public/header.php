@@ -45,7 +45,7 @@ require_once __DIR__ . '/../src/auth.php';
               <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
                 <?php if (isset($_SESSION['user_id'])): ?>
                   <?php if (isAdmin()): ?>
-                    <li class="nav-item me-3"><a class="nav-link" href="admin_dashboard.php">Dashboard</a></li>
+                    <li class="nav-item me-3"><a class="nav-link" href="admin_panel.php">Admin Paneli</a></li>
                     <li class="nav-item"><a class="nav-link" href="logout.php">Logout</a></li>
                   <?php elseif (isCompany()): ?>
                     <li class="nav-item me-3"><a class="nav-link" href="company_panel.php">Firma Paneli</a></li>

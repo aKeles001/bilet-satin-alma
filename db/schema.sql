@@ -73,7 +73,7 @@ CREATE TABLE Coupons (
     id TEXT PRIMARY KEY,                          -- UUID
     code TEXT UNIQUE NOT NULL,
     discount REAL NOT NULL,
-    company_id TEXT NOT NULL,
+    company_id TEXT,                              -- Nullable FK (if null, coupon is admin)
     usage_limit INTEGER NOT NULL,
     expire_date DATETIME NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

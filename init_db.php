@@ -2,8 +2,8 @@
 
 $dbPath = __DIR__ . '/db/database.sqlite';
 $schemaFile = __DIR__ . '/db/schema.sql';
-include __DIR__ . '/src/db_connect.php';
-include __DIR__ . '/src/helper.php';
+include_once __DIR__ . '/src/db_connect.php';
+include_once __DIR__ . '/src/helper.php';
 try {
 
     $db = new PDO('sqlite:' . $dbPath);

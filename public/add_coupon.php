@@ -26,8 +26,7 @@ elseif (isAdmin()) {
     $discount = $_POST['discount'] ?? '';
     $usage_limit = $_POST['usage_limit'] ?? '';
     $expire_date = $_POST['expire_date'] ?? '';
-    $company_id = $_SESSION['user_id'] ?? '';
-    $result = add_admin_coupon($code, $discount, $usage_limit, $expire_date, company_id: $company_id);
+    $result = add_admin_coupon($code, $discount, $usage_limit, $expire_date);
     if ($result['success']) {
         $success = $result['message'];
     } else {

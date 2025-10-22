@@ -9,7 +9,8 @@ $user_id = $_SESSION['user_id'];
 $full_name = $_SESSION['full_name'] ?? '';
 
 $companies = get_companies();
-$coupons = get_coupons($user_id);
+$coupons = get_admin_coupons();
+$users = get_users();
 
 ?>
 <div class="main-content">
@@ -28,10 +29,8 @@ $coupons = get_coupons($user_id);
               <thead>
                 <tr>
                   <th>Firma İsimleri</th>
-                  <th>Firma Admin İsimleri</th>
-                  <th>Firma Admin E-Mail</th>
                   <th>Firma ID</th>
-                  <th>Firma Kupon Tanımla</th>
+                  <th>Firma Kaldır</th>
                 </tr>
               </thead>
               <tbody>
@@ -41,13 +40,11 @@ $coupons = get_coupons($user_id);
                   <?php foreach ($companies as $company): ?>
                     <tr>
                       <td><?= htmlspecialchars($company['name']) ?>
-                      <td><?= htmlspecialchars($company['full_name']) ?>
-                      <td><?= htmlspecialchars($company['email']) ?>
                       <td><?= htmlspecialchars($company['id']) ?>
                       <td>
-                        <form action="add_coupon.php" method="POST" style="display:inline;">
+                        <form action="cancel_company.php" method="POST" style="display:inline;">
                             <input type="hidden" name="company_id" value="<?= htmlspecialchars($company['id']) ?>">
-                            <button type="submit" class="btn btn-success btn-sm">Tanımla</button>
+                            <button type="submit" class="btn btn-danger btn-sm">Sil</button>
                         </form>
                       </td>
                     </tr>
@@ -57,6 +54,10 @@ $coupons = get_coupons($user_id);
             </table>
             <div class="mt-3 text-end">
               <a href="add_company.php" class="btn btn-success">Firma Ekle</a>
+              <form action="add_company_admin.php" method="POST" style="display:inline;">
+                <input type="hidden" name="company_id" value="<?= htmlspecialchars($company['id']) ?>">
+                <button type="submit" class="btn btn-success">Firma Admin Ekle</button>
+              </form>
             </div>
             <h5 class="card-title">Kayıtlı Kuponlar</h5>
             <table class="table table-striped">
@@ -105,48 +106,54 @@ $coupons = get_coupons($user_id);
               </form>
             </div>
             
-            <h5 class="card-title mt-4">Satılan Biletler</h5>
+            <h5 class="card-title mt-4">Kullanıcılar</h5>
             <table class="table table-striped">
               <thead>
                 <tr>
-                  <th>Sefer</th>
-                  <th>Tarih</th>
-                  <th>Saat</th>
                   <th>İsim</th>
-                  <th>Durum</th>
-                  <th>İptal Et</th>
-                  <th>Sil</th>
+                  <th>E-mail</th>
+                  <th>Role</th>
+                  <th>Firma</th>
+                  <th>Firma Admini Ata</th>
                 </tr>
               </thead>
               <tbody>
-                <?php if (empty($tickets)): ?>
-                  <tr><td colspan="3" class="text-center">Kayıtlı bilet bulunamadı.</td></tr>
+                <?php if (empty($users)): ?>
+                  <tr><td colspan="3" class="text-center">Kayıtlı kullanıcı bulunamadı.</td></tr>
                 <?php else: ?>
-                  <?php foreach ($tickets as $ticket): ?>
+                  <?php foreach ($users as $user): ?>
                     <tr>
-                      <td><?= htmlspecialchars($ticket['departure_city']) ?> → <?= htmlspecialchars($ticket['destination_city']) ?></td>
-                      <td><?= date('d M Y  h:m', strtotime($ticket['departure_time'])) ?></td>
-                      <td><?= date('H:m', strtotime($ticket['departure_time'])) ?></td>
-                      <td><?= htmlspecialchars($ticket['full_name']) ?></td>
+                      <td><?= htmlspecialchars($user['full_name']) ?></td>
+                      <td><?= htmlspecialchars($user['email']) ?></td>
                       <td>
-                        <?php if ($ticket['status'] === 'active'): ?>
-                          <span class="badge bg-success">Aktif</span>
-                        <?php elseif ($ticket['status'] === 'cancelled'): ?>
-                          <span class="badge bg-danger">İptal Edildi</span>
-                        <?php else: ?>
-                          <span class="badge bg-secondary">Süresi Doldu</span>
+                        <?php if ($user['role'] === 'user'): ?>
+                          <span class="badge bg-secondary">Kullanıcı</span>
+                        <?php elseif ($user['role'] === 'company'): ?>
+                          <span class="badge bg-primary">Firma Yetkilis</span>
+                        <?php elseif ($user['role'] === 'admin'): ?>
+                          <span class="badge bg-danger">admin</span>
                         <?php endif; ?>
                       </td>
                       <td>
-                        <form action="cancel_ticket.php" method="POST" style="display:inline;">
-                            <input type="hidden" name="ticket_id" value="<?= htmlspecialchars($ticket['id']) ?>">
-                            <button type="submit" class="btn btn-danger btn-sm">İptal Et</button>
-                        </form>
+                        <?php if (!($user['company_id'] == NULL)): ?>
+                          <?= htmlspecialchars($user['company_name']) ?>
+                        <?php else: ?>
+                          <span class="badge bg-secondary">-------</span>
+                        <?php endif; ?>
                       </td>
                       <td>
-                        <form action="delete_history.php" method="POST" style="display:inline;">
-                            <input type="hidden" name="ticket_id" value="<?= htmlspecialchars($ticket['id']) ?>">
-                            <button type="submit" class="btn btn-secondary btn-sm">Sil</button>
+                        <form action="company_admin_set.php" method="POST" style="display:inline;">
+                          <input type="hidden" name="user_id" value="<?= htmlspecialchars($user['id']) ?>">
+                          <select name="company_id" class="form-select form-select-sm d-inline-block w-auto" required>
+                              <option value="">Select Company</option>
+                              <?php foreach ($companies as $company): ?>
+                                  <option value="<?= htmlspecialchars($company['id']) ?>">
+                                      <?= htmlspecialchars($company['name']) ?>
+                                  </option>
+                              <?php endforeach; ?>
+                          </select>
+
+                          <button type="submit" class="btn btn-warning btn-sm">Ata</button>
                         </form>
                       </td>
                     </tr>
