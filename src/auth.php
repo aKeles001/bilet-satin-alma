@@ -52,6 +52,11 @@ function isCompany()
 {
     return isset($_SESSION['role']) && $_SESSION['role'] === 'company';
 }
+
+function isUser()
+{
+    return isset($_SESSION['role']) && $_SESSION['role'] === 'user';
+}
 function registerUser($full_name, $email, $password, $company_id = null, $role = 'user')
 {
     global $db;

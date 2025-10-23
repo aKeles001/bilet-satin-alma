@@ -9,10 +9,8 @@ try {
     $db = new PDO('sqlite:' . $dbPath);
     $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-    // Enable foreign keys
     $db->exec("PRAGMA foreign_keys = ON;");
 
-    // Check if schema.sql exists
     if (!file_exists($schemaFile)) {
         throw new Exception("Schema file not found: $schemaFile");
     }

@@ -24,10 +24,10 @@ function validate_registration($full_name, $email, $password) {
 }
 
 // Book ticket
-function book_ticket($trip_id, $user_id) {
+function book_ticket($trip_id, $user_id, $booked_seat, $code = 0) {
     require __DIR__ . '/db_connect.php';
 
-    $stmt = $db->prepare('SELECT capacity, price FROM Trips WHERE id = :trip_id');
+    $stmt = $db->prepare('SELECT capacity, price, company_id FROM Trips WHERE id = :trip_id');
     $stmt->execute([':trip_id' => $trip_id]);
     $trip = $stmt->fetch(PDO::FETCH_ASSOC);
     if (!$trip) {
@@ -38,16 +38,47 @@ function book_ticket($trip_id, $user_id) {
     if ($booked >= $trip['capacity']) {
         return ['success' => false, 'message' => 'No seats available.'];
     }
-    // Balance operations
+    
     $stmt = $db->prepare('SELECT balance FROM User WHERE id = :user_id');
     $stmt->execute([':user_id' => $user_id]);
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
-    if (!$user || $user['balance'] < $trip['price']) {
-        return ['success' => false, 'message' => 'Insufficient balance.'];
-    }
+    if (empty($code)){
+        if (!$user || $user['balance'] < $trip['price']) {
+            return ['success' => false, 'message' => 'Insufficient balance.'];
+        }
+        $stmt = $db->prepare('UPDATE User SET balance = balance - :price WHERE id = :user_id');
+        $stmt->execute([':price' => $trip['price'], ':user_id' => $user_id]);}
+    else {
+    $stmt = $db->prepare('SELECT * 
+        FROM Coupons C
+        JOIN Bus_Company B ON C.company_id = B.id
+        WHERE code = :code AND company_id = :company_id');
+    $stmt->execute([':code'=> $code, ':company_id' => $trip['company_id']]);
+    $coupon = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    $stmt = $db->prepare('UPDATE User SET balance = balance - :price WHERE id = :user_id');
-    $stmt->execute([':price' => $trip['price'], ':user_id' => $user_id]);
+    if ($coupon) {
+        $trip['price'] = max(0, $trip['price'] - $coupon['discount']);
+
+        if (!$user || $user['balance'] < $trip['price']) {
+            return ['success' => false, 'message' => 'Insufficient balance.'];
+        }
+
+        $stmt = $db->prepare('UPDATE User SET balance = balance - :price WHERE id = :user_id');
+        $stmt->execute([':price' => $trip['price'], ':user_id' => $user_id]);
+        $stmt = $db->prepare('INSERT INTO User_Coupons (id, coupon_id, user_id) VALUES (:id, :coupon_id, :user_id)');
+        $stmt->execute([':id'=> uuid(),
+                        ':coupon_id' => $coupon['id'],
+                        ':user_id'=> $user_id]);
+        $stmt = $db->prepare('UPDATE Coupons 
+                      SET usage_limit = usage_limit - :usage 
+                      WHERE id = :coupon_id');
+        $stmt->bindValue(':usage', 1, PDO::PARAM_INT);
+        $stmt->bindValue(':coupon_id', $coupon['id']);
+        $stmt->execute();
+    } else {
+        return ['success' => false, 'message' => 'Geçersiz kupon!'];
+    }
+}
     // Create ticket
     $ticket_id = uuid();
     $stmt = $db->prepare('INSERT INTO Tickets (id, trip_id, user_id, total_price) VALUES (:id, :trip_id, :user_id, :total_price)');
@@ -58,7 +89,7 @@ function book_ticket($trip_id, $user_id) {
         ':total_price' => $trip['price']
     ]);
     // Seat assignment
-    $seat_number = $booked + 1;
+    $seat_number = $booked_seat;
     $booked_seat_id = uuid();
     $stmt = $db->prepare('INSERT INTO Booked_Seats (id, ticket_id, seat_number) VALUES (:id, :ticket_id, :seat_number)');
     $stmt->execute([
@@ -66,7 +97,7 @@ function book_ticket($trip_id, $user_id) {
         ':ticket_id' => $ticket_id,
         ':seat_number' => $seat_number
     ]);
-    return ['success' => true, 'message' => 'Ticket booked successfully! Seat: ' . $seat_number, 'ticket_id' => $ticket_id, 'seat_number' => $seat_number];
+    return ['success' => true, 'message' => 'Bilet başarıyla alındı! Koltuk: ' . $seat_number, 'ticket_id' => $ticket_id, 'seat_number' => $seat_number];
 }
 // Get balance
 function get_user_balance($user_id) {

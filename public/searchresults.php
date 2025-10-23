@@ -31,8 +31,12 @@ $trips = searchTrips($departureCity, $destinationCity, $departureDate);
                                 <strong>Varış:</strong> <?= date('d-m-Y H:i', strtotime($trip['arrival_time'])) ?><br>
                                 <strong>Fiyat:</strong> ₺<?= number_format($trip['price'], 2) ?><br>
                                 <strong>Kapasite:</strong> <?= $trip['capacity'] - available_seats(trip_id: $trip['id']) ?>
+                                <form action="select_seat.php" method="POST">
+                                    <input type="hidden" name="trip_id" value="<?= $trip['id'] ?>">
+                                <button type="submit" class="btn btn-primary">Koltuk Seç</button>
+                            </form>
                             </p>
-                            <a href="select_seat.php?trip_id=<?= $trip['id'] ?>" class="btn btn-primary">Koltuk Seç</a>
+                            
                         </div>
                     </div>
                 </div>
