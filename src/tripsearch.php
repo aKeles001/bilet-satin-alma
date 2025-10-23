@@ -5,7 +5,7 @@ function searchTrips($departureCity, $destinationCity, $departureDate) {
         $pdo = new PDO("sqlite:" . $dbPath);
         $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-        $query = "SELECT t.id, t.departure_city, t.destination_city, t.departure_time, t.arrival_time, t.price, t.capacity, b.name AS company_name
+        $query = "SELECT t.id, t.departure_city, t.destination_city, t.departure_time, t.arrival_time, t.price, t.capacity, b.logo_path, b.name AS company_name
                   FROM Trips t
                   JOIN Bus_Company b ON t.company_id = b.id
                   WHERE t.departure_city LIKE :departure_city
