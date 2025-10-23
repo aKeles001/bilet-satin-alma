@@ -37,6 +37,7 @@ $tickets = get_user_tickets($user_id, 20);
                   <th>Tarih</th>
                   <th>Saat</th>
                   <th>Durum</th>
+                  <th>İptal Et</th>
                 </tr>
               </thead>
               <tbody>
@@ -56,6 +57,12 @@ $tickets = get_user_tickets($user_id, 20);
                         <?php else: ?>
                           <span class="badge bg-secondary">Süresi Doldu</span>
                         <?php endif; ?>
+                      <td>
+                        <form action="cancel_ticket.php" method="POST" style="display:inline;">
+                          <input type="hidden" name="ticket_id" value="<?= htmlspecialchars($ticket['id']) ?>">
+                          <button type="submit" class="btn btn-danger btn-sm">Cancel</button>
+                        </form>
+                      </td>
                       </td>
                     </tr>
                   <?php endforeach; ?>

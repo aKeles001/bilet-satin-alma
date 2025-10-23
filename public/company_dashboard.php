@@ -46,20 +46,20 @@ $trips = get_company_trips($company_id);
                       <td><?= date('H:m', strtotime($trip['departure_time'])) ?></td>
                       <td>
                         <form action="cancel_trip.php" method="POST" style="display:inline;">
-                        <input type="hidden" name="trip_id" value="<?= htmlspecialchars($trip['id']) ?>">
-                        <button type="submit" class="btn btn-danger btn-sm">Cancel</button>
+                          <input type="hidden" name="trip_id" value="<?= htmlspecialchars($trip['id']) ?>">
+                          <button type="submit" class="btn btn-danger btn-sm">Cancel</button>
                         </form>
                       </td>
                       <td>
                         <form action="edit_trip.php" method="POST" style="display:inline;">
-                        <input type="hidden" name="trip_id" value="<?= htmlspecialchars($trip['id']) ?>">
-                        <a href="edit_trip.php?trip_id=<?= $trip['id'] ?>" class="btn btn-sm btn-warning">Düzenle</a>
+                          <input type="hidden" name="trip_id" value="<?= htmlspecialchars($trip['id']) ?>">
+                          <a href="edit_trip.php?trip_id=<?= $trip['id'] ?>" class="btn btn-sm btn-warning">Düzenle</a>
                         </form>
                       </td>
                       <td>
                         <form action="add_coupon.php" method="POST" style="display:inline;">
-                        <input type="hidden" name="trip_id" value="<?= htmlspecialchars($trip['id']) ?>">
-                        <a href="edit_trip.php?trip_id=<?= $trip['id'] ?>" class="btn btn-sm btn-success">Tanımla</a>
+                          <input type="hidden" name="trip_id" value="<?= htmlspecialchars($trip['id']) ?>">
+                          <a href="edit_trip.php?trip_id=<?= $trip['id'] ?>" class="btn btn-sm btn-success">Tanımla</a>
                         </form>
                       </td>
                     </tr>

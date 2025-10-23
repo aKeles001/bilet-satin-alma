@@ -6,8 +6,10 @@ require_once __DIR__ . '/../src/helper.php';
 
 $error = '';
 $success = '';
+$user_id = $_SESSION['user_id'];
 
 requireLogin();
+$user_tickets = get_user_tickets( $user_id );
 
 if (isCompany() && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $ticket_id = $_POST['ticket_id'] ?? '';
@@ -18,6 +20,23 @@ if (isCompany() && $_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
         $error = $result['message'];
     }
+}
+elseif (isUser() && $_SERVER['REQUEST_METHOD'] === 'POST'){
+    $ticket_id = $_POST['ticket_id'];
+    foreach ($user_tickets as $user_ticket){
+      if ($user_ticket['id'] == $ticket_id) {
+        $result = cancel_ticket($ticket_id);
+        if ($result['success']) {
+            $success = $result['message'];
+        } else {
+            $error = $result['message'];
+        }
+      }
+    }
+}
+else{
+  $result['message'] = 'asdasd';
+  $error = $result['message'];
 }
 ?>
 
@@ -56,13 +75,19 @@ document.addEventListener('DOMContentLoaded', function() {
         modalBody.innerHTML = "<?= htmlspecialchars($error) ?>";
     <?php endif; ?>
 
+    <?php if (isCompany()): ?>
     modal.show();
-
-    // Optional: Redirect after closing the modal
     const modalElement = document.getElementById('resultModal');
     modalElement.addEventListener('hidden.bs.modal', () => {
         window.location.href = "company_panel.php";
     });
+    <?php elseif (isUser()): ?>
+    modal.show();
+    const modalElement = document.getElementById('resultModal');
+    modalElement.addEventListener('hidden.bs.modal', () => {
+        window.location.href = "dashboard.php";
+    });
+    <?php endif; ?>
 });
 </script>
 <?php endif; ?>

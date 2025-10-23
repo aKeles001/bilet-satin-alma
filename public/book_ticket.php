@@ -6,16 +6,21 @@ require_once __DIR__ . '/../src/helper.php';
 include 'header.php';
 
 $message = '';
-if (!isset($_GET['trip_id'])) {
+if (!isset($_POST['trip_id'])) {
 		$message = 'No trip selected.';
-} else {
-		$trip_id = $_GET['trip_id'];
+} 
+else {
+		$trip_id = $_POST['trip_id'];
+		$booked_seat = $_POST['selected_seat'];
+		$code = $_POST['code'];
 		$user_id = $_SESSION['user_id'];
-		$result = book_ticket($trip_id, $user_id);
-		$message = $result['message'];
-		if (isset($result['seat_number'])) {
-			$message .= '<br><strong>Koltuk No:</strong> ' . htmlspecialchars($result['seat_number']);
+		if (!empty($code)){
+			$result = book_ticket($trip_id, $user_id, $booked_seat, $code);
 		}
+		else {
+			$result = book_ticket($trip_id, $user_id, $booked_seat);
+		}
+		$message = $result['message'];
 }
 ?>
 <div class="main-content d-flex justify-content-center align-items-center" style="min-height: 60vh;">
