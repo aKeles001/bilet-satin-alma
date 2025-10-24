@@ -5,7 +5,7 @@ require_once '../src/helper.php';
 
 
 $trip_id = $_POST['trip_id'] ?? null;
-if (!$trip_id) die("Trip not found");
+if (!$trip_id) die("Sefer Bulunamadı");
 
 $trip = get_company_trip($trip_id);
 $bookedSeats = getBookedSeats($trip_id);
@@ -21,7 +21,7 @@ $capacity = $trip['capacity'];
     <div class="d-flex justify-content-center align-items-start gap-5">
 
         <div class="bus-container mx-auto" style="position: relative; width: 350px;">
-            <img src="/bus_front.png" class="img-fluid" style="width: 100%;" alt="Bus">
+            <img src="images/bus_front.png" class="img-fluid" style="width: 100%;" alt="Bus">
 
             <div class="seat-grid" style="position: absolute; top: 200px; left: 50%; transform: translateX(-50%); width: 80%;">
                 <?php

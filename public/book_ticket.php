@@ -7,7 +7,7 @@ include 'header.php';
 
 $message = '';
 if (!isset($_POST['trip_id'])) {
-		$message = 'No trip selected.';
+		$message = 'Sefer seçilmedi.';
 } 
 else {
 		$trip_id = $_POST['trip_id'];

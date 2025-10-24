@@ -30,7 +30,7 @@ if (isAdmin()) {
                 $target_path = $target_dir . $new_name;
 
                 if (move_uploaded_file($logo['tmp_name'], $target_path)) {
-                    $success = "Company logo uploaded successfully.";
+                    $success = "Şirket Logosu başarıyla yüklendi";
                     $result = add_company($name, $target_path, $full_name, $email, $password);
                     if ($result['success']) {
                         $success = $result['message'];
@@ -39,7 +39,7 @@ if (isAdmin()) {
                     }
                 }
             } else {
-                $error = 'Logo upload failed.';
+                $error = 'Logo yüklenirken bir hata meydana geldi.';
         }
     }
 }
