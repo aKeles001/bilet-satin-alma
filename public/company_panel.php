@@ -12,11 +12,16 @@ $full_name = $_SESSION['full_name'] ?? '';
 $trips = get_company_trips($company_id);
 $coupons = get_company_coupons($company_id);
 $tickets = get_company_tickets($company_id);
+$logo_path = get_company_logo($company_id);
+
 
 ?>
 <div class="main-content">
   <div class="container">
   <h2 class="mb-4">Hoşgeldin, <?= htmlspecialchars($full_name) ?></h2>
+  <?php if (!empty($logo_path)): ?>
+      <img src="<?= htmlspecialchars($logo_path) ?>" alt="Company Logo" style="height: 100px; display: block; margin-bottom: 20px;">
+  <?php endif; ?>
     <div class="row g-4">
       <div class="col-md-4">
         <div class="card text-center shadow-sm">
@@ -48,7 +53,7 @@ $tickets = get_company_tickets($company_id);
                       <td>
                         <form action="cancel_trip.php" method="POST" style="display:inline;">
                         <input type="hidden" name="trip_id" value="<?= htmlspecialchars($trip['id']) ?>">
-                        <button type="submit" class="btn btn-danger btn-sm">Cancel</button>
+                        <button type="submit" class="btn btn-danger btn-sm">İptal Et</button>
                         </form>
                       </td>
                       <td>
@@ -90,7 +95,7 @@ $tickets = get_company_tickets($company_id);
                       <td>
                         <form action="cancel_coupon.php" method="POST" style="display:inline;">
                             <input type="hidden" name="coupon_id" value="<?= htmlspecialchars($coupon['id']) ?>">
-                            <button type="submit" class="btn btn-danger btn-sm">Cancel</button>
+                            <button type="submit" class="btn btn-danger btn-sm">İptal Et</button>
                         </form>
                       </td>
                       <td>

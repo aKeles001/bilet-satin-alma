@@ -31,7 +31,7 @@ include 'header.php';
 <div class="main-content">
   <div class="d-flex justify-content-center align-items-center" style="min-height: 80vh;">
     <div class="card shadow-sm p-4" style="width: 400px;">
-      <h3 class="text-center mb-3">Login</h3>
+      <h3 class="text-center mb-3">Giriş Yap</h3>
       <?php if ($error): ?>
         <div class="alert alert-danger"><?= htmlspecialchars($error) ?></div>
       <?php endif; ?>
@@ -41,10 +41,10 @@ include 'header.php';
           <input type="email" name="email" class="form-control" required>
         </div>
         <div class="mb-3">
-          <label class="form-label">Password</label>
+          <label class="form-label">Şifre</label>
           <input type="password" name="password" class="form-control" required>
         </div>
-        <button type="submit" class="btn btn-primary w-100">Login</button>
+        <button type="submit" class="btn btn-primary w-100">Giriş Yap</button>
       </form>
     </div>
   </div>

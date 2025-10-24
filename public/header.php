@@ -46,17 +46,17 @@ require_once __DIR__ . '/../src/auth.php';
                 <?php if (isset($_SESSION['user_id'])): ?>
                   <?php if (isAdmin()): ?>
                     <li class="nav-item me-3"><a class="nav-link" href="admin_panel.php">Admin Paneli</a></li>
-                    <li class="nav-item"><a class="nav-link" href="logout.php">Logout</a></li>
+                    <li class="nav-item"><a class="nav-link" href="logout.php">Çıkış Yap</a></li>
                   <?php elseif (isCompany()): ?>
                     <li class="nav-item me-3"><a class="nav-link" href="company_panel.php">Firma Paneli</a></li>
-                    <li class="nav-item"><a class="nav-link" href="logout.php">Logout</a></li>
+                    <li class="nav-item"><a class="nav-link" href="logout.php">Çıkış Yap</a></li>
                   <?php else: ?>
                     <li class="nav-item me-3"><a class="nav-link" href="dashboard.php">Dashboard</a></li>
-                    <li class="nav-item"><a class="nav-link" href="logout.php">Logout</a></li>
+                    <li class="nav-item"><a class="nav-link" href="logout.php">Çıkış Yap</a></li>
                   <?php endif; ?>
                 <?php else: ?>
-                  <li class="nav-item me-3"><a class="nav-link" href="login.php">Login</a></li>
-                  <li class="nav-item"><a class="nav-link" href="register.php">Register</a></li>
+                  <li class="nav-item me-3"><a class="nav-link" href="login.php">Giriş Yap</a></li>
+                  <li class="nav-item"><a class="nav-link" href="register.php">Kayıt Ol</a></li>
                 <?php endif; ?>
               </ul>
             </div>

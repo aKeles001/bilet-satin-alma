@@ -58,7 +58,7 @@ include 'header.php';
               </div>
               <div class="mb-3">
                   <label class="form-label">Çıkış Tarihi ve Saati</label>
-                  <input type="datetime-local" name="departure_time" class="form-control" required>
+                  <input type="datetime-local"  name="departure_time" class="form-control" required>
               </div>
               <div class="mb-3">
               <label class="form-label">Varış Tarihi ve Saati</label>

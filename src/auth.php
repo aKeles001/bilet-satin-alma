@@ -66,12 +66,12 @@ function registerUser($full_name, $email, $password, $company_id = null, $role =
     $password = trim($password ?? '');
     $company_id = trim($company_id ?? '');
     if (!$full_name || !$email || !$password) {
-        return ['success' => false, 'message' => 'All fields are required.'];
+        return ['success' => false, 'message' => 'Tum Alanların Doldurulması Gereklidir.'];
     }
     $stmt = $db->prepare("SELECT id FROM `User` WHERE email = :email");
     $stmt->execute([':email' => $email]);
     if ($stmt->fetch(PDO::FETCH_ASSOC)) {
-        return ['success' => false, 'message' => 'Email already exists.'];
+        return ['success' => false, 'message' => 'Email zaten kullanımda'];
     }
     $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
     $id = uuid();
@@ -87,9 +87,9 @@ function registerUser($full_name, $email, $password, $company_id = null, $role =
     ]);
 
     if ($result) {
-        return ['success' => true, 'message' => 'Registration successful.'];
+        return ['success' => true, 'message' => 'Kayıt başarılı.'];
     } else {
-        return ['success' => false, 'message' => 'Database error. Please try again.'];
+        return ['success' => false, 'message' => 'Bir hata meydana geldi.'];
     }
 }
 ?>

@@ -33,7 +33,7 @@ elseif (isAdmin()) {
         $error = $result['message'];
     }
 } else {
-    $error = 'You do not have permission to add a coupon.';
+    $error = 'Kupon tanımlama yetkiniz bulumamakta.';
 }
 include 'header.php'
 ?>

@@ -59,7 +59,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     modal.show();
 
-    // Optional: Redirect after closing the modal
     const modalElement = document.getElementById('resultModal');
     modalElement.addEventListener('hidden.bs.modal', () => {
         window.location.href = "admin_panel.php";

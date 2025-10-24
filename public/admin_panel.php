@@ -84,7 +84,7 @@ $users = get_users();
                       <td>
                         <form action="cancel_coupon.php" method="POST" style="display:inline;">
                             <input type="hidden" name="coupon_id" value="<?= htmlspecialchars($coupon['id']) ?>">
-                            <button type="submit" class="btn btn-danger btn-sm">Cancel</button>
+                            <button type="submit" class="btn btn-danger btn-sm">İptal Et</button>
                         </form>
                       </td>
                       <td>
@@ -145,7 +145,7 @@ $users = get_users();
                         <form action="company_admin_set.php" method="POST" style="display:inline;">
                           <input type="hidden" name="user_id" value="<?= htmlspecialchars($user['id']) ?>">
                           <select name="company_id" class="form-select form-select-sm d-inline-block w-auto" required>
-                              <option value="">Select Company</option>
+                              <option value="">Şirket Seç</option>
                               <?php foreach ($companies as $company): ?>
                                   <option value="<?= htmlspecialchars($company['id']) ?>">
                                       <?= htmlspecialchars($company['name']) ?>
