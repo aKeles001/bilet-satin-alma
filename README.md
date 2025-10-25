@@ -49,8 +49,12 @@ Projeyi yerel makinenizde çalıştırmak için Docker kullanabilirsiniz.
 4.  **Uygulamaya Erişin:**
     Kurulum tamamlandıktan sonra, web tarayıcınızdan `http://localhost:8080` adresine giderek uygulamayı görüntüleyebilirsiniz.
 
-## örnek Kullanıcı Bilgileri
+5.  **Süresi Geçen Kupon ve Sefer:**
+    Root klasöründe bulunan `expire_records.php` scriptini ister manuel olarak çalıştırılarak ister bir cronjob atanarak süresi geçen biletlerin drumunu güncelleyip kuponları veritabanından silebilinebilir.
+
+## Örnek Kullanıcı Bilgileri
 
 - **Admin:** `admin@bilet.com` - `admin123`
 - **Firma:** `firma@kamilkoc.com` - `firma123`
 - **Kullanıcı:** `user@bilet.com` - `user123`
+- **Sefer** `Ankara` - `Istanbul` - `11-10-2025`
